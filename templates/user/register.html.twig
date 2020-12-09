@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Inscription | Actunews
+{% endblock %}
+
+
+{% block body %}
+    <div class="p-3 mx-auto text-center">
+        <h1 class="display-4">Inscrivez-vous</h1>
+    </div>
+
+    {# -- .py-5.bg-light>.container>.row>.col-md-4.mt-4 -- #}
+    <div class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-8 mx-auto">
+                    {{ form(form) }}
+                </div>
+            </div> <!-- /.row -->
+        </div> <!-- /.container -->
+    </div> <!-- /.bg-light -->
+
+{% endblock %}
