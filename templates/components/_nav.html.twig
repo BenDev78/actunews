@@ -1,20 +1,25 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="{{ path("default_index") }}">ActuNews</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "politique"}) }}">Politique</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "economie"}) }}">Economie</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "social"}) }}">Social</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "sante"}) }}">Santé</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "culture"}) }}">Culture</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "loisirs"}) }}">Loisirs</a>
-            <a class="nav-link" href="{{ path("default_category", {"alias" : "sports"}) }}">Sports</a>
-            <a class="nav-link" href="{{ path("contact_contact") }}">Contact</a>
-            <a class="nav-link" href="{{ path("user_register") }}">Inscription</a>
+    <div class="container">
+        <a class="navbar-brand" href="{{ path("default_index") }}">ActuNews</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav mr-auto">
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "politique"}) }}">Politique</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "economie"}) }}">Economie</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "social"}) }}">Social</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "sante"}) }}">Santé</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "culture"}) }}">Culture</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "loisirs"}) }}">Loisirs</a>
+                <a class="nav-link" href="{{ path("default_category", {"alias" : "sports"}) }}">Sports</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-link" href="{{ path("post_create") }}">Rédiger un article</a>
+                <a class="nav-link" href="{{ path("contact_contact") }}">Contact</a>
+                <a class="nav-link" href="{{ path("user_register") }}">Inscription</a>
+            </div>
         </div>
     </div>
 </nav>

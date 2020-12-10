@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -24,6 +25,12 @@ use Symfony\Component\Validator\Constraints\Length;
  */
 class UserController extends AbstractController
 {
+    private $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
     /**
      * Permet d'inscrire un user
      * @Route("/register", name="user_register", methods={"GET|POST"})
@@ -77,11 +84,16 @@ class UserController extends AbstractController
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
-            $user = $form->getData();
+            # Encodage du mot de passe
             $encoded = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($encoded);
-            dd($user);
-            # TODO insert user into database
+
+            # Sauvegarde dans la bdd
+            $this->em->persist($user);
+            $this->em->flush();
+
+            # Redirection vers l'accueil
+            return $this->redirectToRoute('default_index');
         }
 
         # Affichage du formulaire

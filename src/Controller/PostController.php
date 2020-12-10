@@ -6,13 +6,21 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Entity\Post;
+use App\Entity\User;
+use App\Service\FileUploader;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * Gestion des articles du site
@@ -20,16 +28,32 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PostController extends AbstractController
 {
+
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     /**
      * Permet de créer un article
      * @Route("/create", name="post_create", methods={"GET|POST"})
      * ex. http://localhost:8000/dashboard/post/create
+     * @param Request $request : Contient la requête de l'utilisateur et ses données
+     * @param SluggerInterface $slugger
+     * @return Response
      */
-    public function create()
+    public function create(Request $request, SluggerInterface $slugger, FileUploader $fileUploader): Response
     {
         # Création d'un nouvel article
         $post = new Post();
         $post->setCreatedAt(new \DateTime());
+
+        # FIXME : Remplacer par l'utilisateur connecté
+        $post->setUser(
+            $this->getDoctrine()->getRepository(User::class)->find(2)
+        );
         # TODO User
 
         #Création du formulaire
@@ -56,6 +80,38 @@ class PostController extends AbstractController
             ])
             ->getForm()
         ;
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid())
+        {
+            # Upload de l'image
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+
+            # Générer le nom de l'image | sécurisation du nom de l'image
+            if ($imageFile) {
+                $newFilename = $fileUploader->upload($imageFile);
+                # /!\ Permet d'insérer le nouveau nom de l'image dans la BDD /!\
+                $post->setImage($newFilename);
+            }
+
+            # Génération de l'alias
+            $post->setAlias($slugger->slug(
+                $post->getTitle()
+            ));
+            # Sauvegarde dans la bdd
+            $this->entityManager->persist($post);
+            $this->entityManager->flush();
+
+            # TODO : Notification Flash / Confirmation
+
+            # Rediredction vers l'article
+            return $this->redirectToRoute('default_post', [
+               'category' => $post->getCategory()->getAlias(),
+               'alias' => $post->getAlias(),
+               'id' => $post->getId(),
+            ]);
+        }
 
         # Afficher le formulaire
         return $this->render("post/create.html.twig", [

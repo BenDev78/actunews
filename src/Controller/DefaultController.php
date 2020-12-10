@@ -49,13 +49,13 @@ class DefaultController extends AbstractController
      * Afficher le contenu d'un article
      * https://127.0.0.1:8000/politique/covid-19-une-troisieme-vague_1.html
      * @Route("/{category}/{alias}_{id}.html", name="default_post", methods={"GET"})
-     * @param $category
-     * @param $alias
-     * @param $id
+     * @param Post $post
      * @return Response
      */
-    public function post($category, $alias, $id): Response
+    public function post(Post $post): Response
     {
-        return $this->render("default/post.html.twig");
+        return $this->render("default/post.html.twig", [
+            'post' => $post
+        ]);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\PostRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
@@ -19,6 +21,8 @@ class Post
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous avez oublié le titre.")
+     * @Assert\Length(max="255", maxMessage="Attention, votre titre ne doit dépasser {{ limit }} caractères.")
      */
     private $title;
 
@@ -29,11 +33,16 @@ class Post
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="Vous devez saisir un contenu.")
      */
     private $content;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Image(
+     *     mimeTypesMessage="Vérifiez le format de votre image.",
+     *     maxSize="2M", maxSizeMessage="Votre image est trop lourde, 2M maximum.",
+     * )
      */
     private $image;
 
