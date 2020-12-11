@@ -15,10 +15,28 @@
             <div class="jumbotron">
                 <div class="row">
                     <div class="col">
-                        <img class="img-fluid" src="{{ asset('uploads/images/' ~ post.image) }}" alt="{{ post.title }}">
+                        <img class="img-fluid" src="
+                            {% if post.image%}
+                                {{ asset('uploads/images/' ~ post.image) }}" alt="{{ post.title }}
+                            {% else %}
+                                https://via.placeholder.com/500x350
+                            {% endif %}
+                        ">
                     </div>
                     <div class="col">
                         {{ post.content|raw }}
+                        <div class="row mt-4">
+                            <div class="col-3">
+                                <a href="{{ path('post_update', {'id' : post.id}) }}" class="btn btn-warning">Modifier</a>
+                            </div>
+                            <div class="col-3">
+                                <a href="{{ path('post_delete', {'id' : post.id}) }}"
+                                   class="btn btn-danger"
+                                   onclick="return confirm('Voulez-vous vraiment supprimer cet article ? (cette action est irréversible)')">
+                                    supprimer
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

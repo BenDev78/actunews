@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    Rédiger un artcile
+    Modifier un artcile
 {% endblock %}
 
 {% block stylelsheets %}
@@ -26,7 +26,7 @@
     <div class="p-3 mx-auto text-center">
         <h1 class="display-4">ActuNews</h1>
     </div>
-
+    {{ dump(form) }}
     {# -- .py-5.bg-light>.container>.row>.col-md-4.mt-4 -- #}
     <div class="py-5 bg-light">
         <div class="container">
@@ -45,7 +45,7 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/23.1.0/classic/ckeditor.js"></script>
     <script>
         ClassicEditor
-            .create(document.querySelector('#create_post_content'));
+            .create(document.querySelector('#update_post_content'));
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"
             integrity="sha512-8QFTrG0oeOiyWo/VM9Y8kgxdlCryqhIxVeRpWSezdRRAvarxVtwLnGroJgnVW9/XBRduxO/z1GblzPrMQoeuew=="

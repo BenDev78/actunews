@@ -7,15 +7,13 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Post;
 use App\Entity\User;
+use App\Form\CreatePostType;
+use App\Form\UpdatePostType;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,8 +38,9 @@ class PostController extends AbstractController
      * Permet de créer un article
      * @Route("/create", name="post_create", methods={"GET|POST"})
      * ex. http://localhost:8000/dashboard/post/create
-     * @param Request $request : Contient la requête de l'utilisateur et ses données
+     * @param Request $request
      * @param SluggerInterface $slugger
+     * @param FileUploader $fileUploader
      * @return Response
      */
     public function create(Request $request, SluggerInterface $slugger, FileUploader $fileUploader): Response
@@ -54,32 +53,9 @@ class PostController extends AbstractController
         $post->setUser(
             $this->getDoctrine()->getRepository(User::class)->find(2)
         );
-        # TODO User
 
         #Création du formulaire
-        $form = $this->createFormBuilder($post)
-            ->add('title', TextType::class, [
-                'label' => "Titre de l'article"
-            ])
-            ->add('category', EntityType::class, [
-                'label' => 'Choisissez une catégorie',
-                'class' => Category::class,
-                'choice_label' => 'name'
-            ])
-            ->add('content', TextareaType::class, [
-                'label' => "Contenu de l'article"
-            ])
-            ->add('image', FileType::class, [
-                'label' => "Illustration",
-                'attr' => [
-                    'class' => 'dropify'
-                ]
-            ] )
-            ->add('submit', SubmitType::class, [
-                'label' => "Publier cet article"
-            ])
-            ->getForm()
-        ;
+        $form = $this->createForm(CreatePostType::class, $post);
 
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
@@ -121,21 +97,71 @@ class PostController extends AbstractController
 
     /**
      * Permet de mettre à jour article
-     * @Route("/{id}/create", name="post_update", methods={"GET|POST"})
+     * @Route("/{id}/update", name="post_update", methods={"GET|POST"})
      * ex. http://localhost:8000/dashboard/post/1/update
+     * @param Request $request
+     * @param Post $post
+     * @param FileUploader $fileUploader
+     * @return Response
      */
-    public function update()
+    public function update(Request $request, Post $post, FileUploader $fileUploader): Response
     {
-        # TODO
+        # Récupération du l'image existante
+        $oldFile = new File($this->getParameter('images_directory').'/'.$post->getImage());
+        $oldFileName = $oldFile->getFilename();
+
+        $form = $this->createForm(UpdatePostType::class, $post);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid())
+        {
+            $post->setImage($oldFileName);
+
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+
+            # Générer le nom de l'image | sécurisation du nom de l'image
+            if ($imageFile) {
+
+                # Supprime l'ancienne image si elle doit être modifiée
+                $filesystem = new Filesystem();
+                $filesystem->remove($this->getParameter('images_directory').'/'.$oldFileName);
+
+                $newFilename = $fileUploader->upload($imageFile);
+
+                # /!\ Permet d'insérer le nouveau nom de l'image dans la BDD /!\
+                $post->setImage($newFilename);
+            }
+
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('default_post', [
+                'category' => $post->getCategory()->getAlias(),
+                'alias' => $post->getAlias(),
+                'id' => $post->getId()
+            ]);
+        }
+
+        return $this->render('post/update.html.twig', [
+            'form' => $form->createView()
+        ]);
     }
 
     /**
      * Permet de supprimer un article
      * @Route("/{id}/delete", name="post_delete", methods={"GET"})
      * ex. http://localhost:8000/dashboard/post/1/delete
+     * @param Post $post
+     * @return Response
      */
-    public function delete()
+    public function delete(Post $post): Response
     {
-        # TODO
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->getParameter('images_directory').'/'.$post->getImage());
+
+        $this->entityManager->remove($post);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('default_index');
     }
 }
