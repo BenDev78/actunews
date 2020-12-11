@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CreatePostType extends AbstractType
+class PostType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -30,7 +30,9 @@ class CreatePostType extends AbstractType
                 'label' => "Contenu de l'article"
             ])
             ->add('image', FileType::class, [
-                'label' => "Illustration",
+                'label' => "Illustration (Laisser vide pour garder l'image)",
+                'data_class' => null,
+                'required' => true,
                 'attr' => [
                     'class' => 'dropify'
                 ]
@@ -47,4 +49,10 @@ class CreatePostType extends AbstractType
             'data_class' => Post::class,
         ]);
     }
+
+    public function getBlockPrefix()
+    {
+        return 'post';
+    }
+
 }

@@ -4,13 +4,11 @@
 namespace App\Controller;
 
 
-use App\Entity\Category;
 use App\Entity\Post;
-use App\Entity\User;
-use App\Form\CreatePostType;
-use App\Form\UpdatePostType;
+use App\Form\PostType;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
@@ -51,11 +49,11 @@ class PostController extends AbstractController
 
         # FIXME : Remplacer par l'utilisateur connecté
         $post->setUser(
-            $this->getDoctrine()->getRepository(User::class)->find(2)
+            $this->getUser()
         );
 
         #Création du formulaire
-        $form = $this->createForm(CreatePostType::class, $post);
+        $form = $this->createForm(PostType::class, $post);
 
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
@@ -75,11 +73,13 @@ class PostController extends AbstractController
             $post->setAlias($slugger->slug(
                 $post->getTitle()
             ));
+
             # Sauvegarde dans la bdd
             $this->entityManager->persist($post);
             $this->entityManager->flush();
 
-            # TODO : Notification Flash / Confirmation
+            # Notification Flash
+            $this->addFlash('success', 'Félicitations, votre article est en ligne !');
 
             # Rediredction vers l'article
             return $this->redirectToRoute('default_post', [
@@ -97,6 +97,7 @@ class PostController extends AbstractController
 
     /**
      * Permet de mettre à jour article
+     * @IsGranted("ROLE_JOURNALIST")
      * @Route("/{id}/update", name="post_update", methods={"GET|POST"})
      * ex. http://localhost:8000/dashboard/post/1/update
      * @param Request $request
@@ -110,15 +111,14 @@ class PostController extends AbstractController
         $oldFile = new File($this->getParameter('images_directory').'/'.$post->getImage());
         $oldFileName = $oldFile->getFilename();
 
-        $form = $this->createForm(UpdatePostType::class, $post);
+        $form = $this->createForm(PostType::class, $post);
 
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
-            $post->setImage($oldFileName);
-
             /** @var UploadedFile $imageFile */
             $imageFile = $form->get('image')->getData();
+            $post->setImage($oldFileName);
 
             # Générer le nom de l'image | sécurisation du nom de l'image
             if ($imageFile) {
@@ -135,6 +135,8 @@ class PostController extends AbstractController
 
             $this->entityManager->flush();
 
+            $this->addFlash('success', 'Félicitations, votre article a été modifié !');
+
             return $this->redirectToRoute('default_post', [
                 'category' => $post->getCategory()->getAlias(),
                 'alias' => $post->getAlias(),
@@ -142,13 +144,14 @@ class PostController extends AbstractController
             ]);
         }
 
-        return $this->render('post/update.html.twig', [
+        return $this->render('post/create.html.twig', [
             'form' => $form->createView()
         ]);
     }
 
     /**
      * Permet de supprimer un article
+     * @IsGranted("ROLE_ADMIN")
      * @Route("/{id}/delete", name="post_delete", methods={"GET"})
      * ex. http://localhost:8000/dashboard/post/1/delete
      * @param Post $post
@@ -161,6 +164,8 @@ class PostController extends AbstractController
 
         $this->entityManager->remove($post);
         $this->entityManager->flush();
+
+        $this->addFlash('success', 'Félicitations, votre article a été supprimé !');
 
         return $this->redirectToRoute('default_index');
     }

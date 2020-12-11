@@ -9,22 +9,36 @@
     {% block stylelsheets %}
         {# -- Nous mettrons nos feuilles css ici -- #}
         <link rel="stylesheet" href="https://bootswatch.com/4/flatly/bootstrap.min.css">
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+              integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+              crossorigin="anonymous"/>
+
     {% endblock %}
 </head>
 <body>
 
 {# -- Nous mettrons notre contenu HTML ici -- #}
 {# -- main.container-fluid>.row>.col -- #}
+{% if block('admin') is not defined %}
+    {% include 'components/_nav.html.twig' %}
+{% endif %}
 
-{% include 'components/_nav.html.twig' %}
-<main class="container-fluid">
+<main class=container-fluid" style="overflow-x: hidden">
     <div class="row">
         <div class="col">
-            {% block body %}{% endblock %}
+            {% block body %}
+                {% if block('admin') is defined %}
+                    {% include 'components/sidebar.admin.html.twig' %}
+                {% endif %}
+            {% endblock %}
         </div>
     </div>
 </main>
-{% include 'components/_footer.html.twig' %}
+
+{% if block('admin') is not defined %}
+    {% include 'components/_footer.html.twig' %}
+{% endif %}
+
 {% block javascripts %}
     {# -- Nous mettrons nos fichiers JS ici -- #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"

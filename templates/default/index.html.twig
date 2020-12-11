@@ -6,8 +6,14 @@
 
 
 {% block body %}
+{#    {{ dump(app.user) }}#}
+
     <div class="p-3 mx-auto text-center">
-        <h1 class="display-4">ActuNews</h1>
+        <h1 class="display-4">ActuNews
+            {% if app.user %}
+                <small class="text-muted"><em>Bonjour {{ app.user.firstname }}</em></small>
+            {% endif %}
+        </h1>
     </div>
 
 {# -- .py-5.bg-light>.container>.row>.col-md-4.mt-4 -- #}

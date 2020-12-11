@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block admin %} {% endblock %}
+
+
+{% block title %}
+
+{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="col">
+        <h1 class="display-4 text-center text-muted mt-4">Liste des Utilisateurs</h1>
+        <div style="overflow-x: auto">
+            <table class="table table-hover text-center mt-4">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Enregistrement</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.roles[0] }}</td>
+                        <td>{{ user.firstname }}</td>
+                        <td>{{ user.lastname }}</td>
+                        <td>{{ user.createdAt|date("d/m/y H:m:s", "Europe/Paris") }}</td>
+                        <td><a href=""><i class="fas fa-trash"></i></a></td>
+                        <td><a href=""><i class="fas fa-times"></i></a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+

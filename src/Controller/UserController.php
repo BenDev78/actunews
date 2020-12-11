@@ -42,6 +42,7 @@ class UserController extends AbstractController
     {
         # Création du user
         $user = new User();
+        $user->setRoles(['ROLE_USER']);
         $user->setCreatedAt(new \DateTime());
 
         # Création du formulaire

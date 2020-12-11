@@ -14,6 +14,18 @@
         <div class="container">
             <div class="jumbotron">
                 <div class="row">
+                    <div class="col-12">
+                        {# read and display several types of flash messages #}
+                        {% for label, messages in app.flashes(['success', 'warning']) %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col">
                         <img class="img-fluid" src="
                             {% if post.image%}
@@ -22,21 +34,25 @@
                                 https://via.placeholder.com/500x350
                             {% endif %}
                         ">
+                        <div class="row mt-4">
+                            {% if app.user and app.user.id is same as post.user.id or is_granted('ROLE_ADMIN') %}
+                                <div class="col-md-6">
+                                    <a href="{{ path('post_update', {'id' : post.id}) }}" class="btn btn-block btn-warning">Modifier</a>
+                                </div>
+                            {% endif %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <div class="col-md-6">
+                                    <a href="{{ path('post_delete', {'id' : post.id}) }}"
+                                       class="btn btn-block btn-danger"
+                                       onclick="return confirm('Voulez-vous vraiment supprimer cet article ? (cette action est irréversible)')">
+                                        supprimer
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="col">
                         {{ post.content|raw }}
-                        <div class="row mt-4">
-                            <div class="col-3">
-                                <a href="{{ path('post_update', {'id' : post.id}) }}" class="btn btn-warning">Modifier</a>
-                            </div>
-                            <div class="col-3">
-                                <a href="{{ path('post_delete', {'id' : post.id}) }}"
-                                   class="btn btn-danger"
-                                   onclick="return confirm('Voulez-vous vraiment supprimer cet article ? (cette action est irréversible)')">
-                                    supprimer
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
